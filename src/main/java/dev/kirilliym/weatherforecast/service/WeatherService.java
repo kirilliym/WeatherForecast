@@ -1,24 +1,14 @@
 package dev.kirilliym.weatherforecast.service;
 
 import dev.kirilliym.weatherforecast.exception.InvalidCityNameException;
+import dev.kirilliym.weatherforecast.repository.WeatherRepository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
-public class ServiceWeather {
-    private final Map<String, Integer> temperature = new HashMap<>();
-    private final Random random = new Random();
+public class WeatherService {
+    private final WeatherRepository weatherRepository = new WeatherRepository();
 
     public int getCityTemperature(String city) {
         validateCityName(city);
-        if (temperature.containsKey(city)) {
-            return temperature.get(city);
-        }
-
-        int newTemperature = random.nextInt(60) - 30; // Диапазон -30..+30
-        temperature.put(city, newTemperature);
-        return newTemperature;
+        return weatherRepository.getTemperature(city);
     }
 
     private static void validateCityName(String city) throws InvalidCityNameException {
