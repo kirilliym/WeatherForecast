@@ -3,10 +3,12 @@ package dev.kirilliym.weatherforecast.service;
 import dev.kirilliym.weatherforecast.exception.InvalidCityNameException;
 import dev.kirilliym.weatherforecast.repository.WeatherRepository;
 
+import java.sql.SQLException;
+
 public class WeatherService {
     private final WeatherRepository weatherRepository = new WeatherRepository();
 
-    public int getCityTemperature(String city) {
+    public int getCityTemperature(String city) throws SQLException {
         validateCityName(city);
         return weatherRepository.getTemperature(city);
     }
