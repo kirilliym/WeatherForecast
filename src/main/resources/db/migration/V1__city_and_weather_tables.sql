@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS City (
 );
 
 CREATE TABLE IF NOT EXISTS Weather (
+    id SERIAL PRIMARY KEY,
     city_id INT REFERENCES City(id) ON DELETE CASCADE,
     temperature BIGINT NOT NULL
-    PRIMARY KEY city_id
 );
