@@ -1,13 +1,12 @@
 package dev.kirilliym.weatherforecast.repository;
 
 import dev.kirilliym.weatherforecast.model.entity.City;
-import dev.kirilliym.weatherforecast.model.entity.Weather;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface WeatherRepository extends JpaRepository<Weather, Integer> {
-    Optional<Weather> findByCity(City city);
+public interface CityRepository extends JpaRepository<City, Integer> {
+    Optional<City> findByName(String name);
 }
