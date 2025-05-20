@@ -14,11 +14,13 @@ public class WeatherController {
     @Autowired
     private WeatherService weatherService;
 
+    private final String TEMPERATURE_ANSWER = "Temperature in %s: %d°C";
+
     @GetMapping("/temperature")
     public ResponseEntity<String> getTemperature(@RequestParam String city) {
         try {
             int temperature = weatherService.getCityTemperature(city).getTemperature();
-            return ResponseEntity.ok(String.format("Temperature in %s: %d°C", city, temperature));
+            return ResponseEntity.ok(String.format(TEMPERATURE_ANSWER, city, temperature));
         } catch (InvalidCityNameException e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         } catch (Exception e) {
