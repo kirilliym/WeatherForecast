@@ -4,11 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class WeatherDTO {
-    private Integer id;
-    private CityDTO city;
-    private int temperature;
+    private Long id;
+    private PlaceDTO place;
+    private Long temp2Cel;
+    private Long tempFeelsCel;
+    private Long windSpeed10;
+    private Long presSurf;
+    private Long vlaga2f;
+    private LocalDateTime updated;
+    private LocalDate date;
+    private LocalTime time;
 }

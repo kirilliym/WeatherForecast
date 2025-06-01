@@ -1,59 +1,73 @@
 package dev.kirilliym.weatherforecast.service;
 
-import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;
-import dev.kirilliym.weatherforecast.model.entity.City;
-import dev.kirilliym.weatherforecast.model.entity.Weather;
-import dev.kirilliym.weatherforecast.exception.InvalidCityNameException;
+import com.fasterxml.jackson.databind.JsonNode;
 import dev.kirilliym.weatherforecast.mapper.WeatherMapper;
-import dev.kirilliym.weatherforecast.repository.CityRepository;
+import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
+import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;
+import dev.kirilliym.weatherforecast.model.entity.Weather;
 import dev.kirilliym.weatherforecast.repository.WeatherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Random;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class WeatherService {
-
     private final WeatherRepository weatherRepository;
-    private final CityRepository cityRepository;
+    private final PlaceService placeService;
     private final WeatherMapper weatherMapper;
-    private final Random random = new Random();
+    private final EolService eolService;
+
+    private static final Duration MAX_DATA_AGE = Duration.ofHours(6);
 
     @Transactional
-    public WeatherDTO getCityTemperature(String cityName) {
-        validateCityName(cityName);
+    public List<WeatherDTO> getWeather(String place, LocalDate date) {
+        PlaceDTO placeDTO = placeService.getPlace(place);
+        Long placeId = placeDTO.getId();
 
-        City city = cityRepository.findByName(cityName)
-                .orElseGet(() -> {
-                    City newCity = new City();
-                    newCity.setName(cityName);
-                    return cityRepository.save(newCity);
-                });
+        List<Weather> existing = weatherRepository.findAllByPlaceIdAndDate(placeId, date);
+        if (!existing.isEmpty()) {
+            LocalDateTime latestUpdate = existing.stream()
+                    .map(Weather::getUpdated)
+                    .max(LocalDateTime::compareTo)
+                    .orElse(LocalDateTime.MIN);
 
-        return weatherRepository.findByCity(city)
-                .map(weatherMapper::mapToDTO)
-                .orElseGet(() -> createNewWeatherEntry(city));
-    }
+            if (latestUpdate.isAfter(LocalDateTime.now().minus(MAX_DATA_AGE))) {
+                return existing.stream().map(weatherMapper::mapToDTO).toList();
+            }
 
-    private WeatherDTO createNewWeatherEntry(City city) {
-        int newTemperature = random.nextInt(60) - 30;
-        Weather weather = new Weather();
-        weather.setCity(city);
-        weather.setTemperature(newTemperature);
-        weatherRepository.save(weather);
-        return weatherMapper.mapToDTO(weather);
-    }
-
-    private void validateCityName(String city) {
-        if (city == null || city.isEmpty()) {
-            throw new InvalidCityNameException("City name cannot be empty");
+            weatherRepository.deleteAll(existing);
         }
 
-        if (!city.matches("[А-Яа-яЁё]+")) {
-            throw new InvalidCityNameException("City name should contain only Russian letters");
+        JsonNode jsonNode = eolService.getWeatherByCoordinates(placeDTO.getLat(), placeDTO.getLon(), date.toString());
+
+        List<WeatherDTO> result = new ArrayList<>();
+        for (JsonNode node : jsonNode) {
+            WeatherDTO dto = new WeatherDTO();
+            dto.setPlace(placeDTO);
+            dto.setTemp2Cel((long) node.get("temp_2_cel").asDouble());
+            dto.setTempFeelsCel((long) node.get("temp_feels_cel").asDouble());
+            dto.setWindSpeed10((long) node.get("wind_speed_10").asDouble());
+            dto.setPresSurf((long) node.get("pres_surf").asDouble());
+            dto.setVlaga2f((long) node.get("vlaga_2").asDouble());
+
+            String dateTimeStr = node.get("dt_forecast").asText();
+            LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr);
+            dto.setDate(dateTime.toLocalDate());
+            dto.setTime(dateTime.toLocalTime());
+            dto.setUpdated(LocalDateTime.now());
+
+            Weather weather = weatherRepository.save(weatherMapper.mapToEntity(dto));
+            result.add(weatherMapper.mapToDTO(weather));
         }
+
+        return result;
     }
 }
+

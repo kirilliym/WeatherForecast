@@ -5,8 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "Weather")
+@Table(name = "weather")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,12 +18,33 @@ public class Weather {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "city_id", referencedColumnName = "id")
-    private City city;
+    @ManyToOne
+    @JoinColumn(name = "place_id", referencedColumnName = "id")
+    private Place place;
 
-    @Column(nullable = false)
-    private int temperature;
+    @Column(name = "temp_2_cel")
+    private Long temp2Cel;
+
+    @Column(name = "temp_feels_cel")
+    private Long tempFeelsCel;
+
+    @Column(name = "wind_speed_10")
+    private Long windSpeed10;
+
+    @Column(name = "pres_surf")
+    private Long presSurf;
+
+    @Column(name = "vlaga_2f")
+    private Long vlaga2f;
+
+    @Column
+    private LocalDateTime updated;
+
+    @Column
+    private LocalDate date;
+
+    @Column
+    private LocalTime time;
 }
