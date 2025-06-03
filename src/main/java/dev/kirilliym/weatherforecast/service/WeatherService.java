@@ -1,7 +1,9 @@
 package dev.kirilliym.weatherforecast.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.benmanes.caffeine.cache.Cache;
 import dev.kirilliym.weatherforecast.mapper.WeatherMapper;
+import dev.kirilliym.weatherforecast.model.WeatherRequest;
 import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
 import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;
 import dev.kirilliym.weatherforecast.model.entity.Weather;
@@ -25,13 +27,23 @@ public class WeatherService {
     private final WeatherMapper weatherMapper;
     private final EolService eolService;
     private final UserRequestProducer userRequestProducer;
+    private final Cache<WeatherRequest, List<WeatherDTO>> weatherCache;
 
     private static final Duration MAX_DATA_AGE = Duration.ofHours(6);
+    private static final List<String> HOT_CITIES = List.of("Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Саратов");
 
     @Transactional
     public List<WeatherDTO> getWeather(String place, LocalDate date) {
         PlaceDTO placeDTO = placeService.getPlace(place);
         Long placeId = placeDTO.getId();
+
+        WeatherRequest weatherRequest = new WeatherRequest(placeId, date);
+        List<WeatherDTO> fromCache = weatherCache.getIfPresent(weatherRequest);
+        if (fromCache != null) {
+            userRequestProducer.send(place, date);
+            return fromCache;
+        }
+
 
         List<Weather> existing = weatherRepository.findAllByPlaceIdAndDate(placeId, date);
         if (!existing.isEmpty()) {
@@ -41,13 +53,26 @@ public class WeatherService {
                     .orElse(LocalDateTime.MIN);
 
             if (latestUpdate.isAfter(LocalDateTime.now().minus(MAX_DATA_AGE))) {
-                return existing.stream().map(weatherMapper::mapToDTO).toList();
+                List<WeatherDTO> result = existing.stream().map(weatherMapper::mapToDTO).toList();
+
+                writeToCache(weatherRequest, placeDTO.getCity().getName(), result);
+                userRequestProducer.send(place, date);
+                return result;
             }
 
             weatherRepository.deleteAll(existing);
         }
 
-        JsonNode jsonNode = eolService.getWeatherByCoordinates(placeDTO.getLat(), placeDTO.getLon(), date.toString());
+        List<WeatherDTO> result = getNewWeatherFromEol(placeDTO, date.toString());
+
+        writeToCache(weatherRequest, placeDTO.getCity().getName(), result);
+        userRequestProducer.send(place, date);
+
+        return result;
+    }
+
+    public List<WeatherDTO> getNewWeatherFromEol(PlaceDTO placeDTO, String date) {
+        JsonNode jsonNode = eolService.getWeatherByCoordinates(placeDTO.getLat(), placeDTO.getLon(), date);
 
         List<WeatherDTO> result = new ArrayList<>();
         for (JsonNode node : jsonNode) {
@@ -69,9 +94,13 @@ public class WeatherService {
             result.add(weatherMapper.mapToDTO(weather));
         }
 
-        userRequestProducer.send(place, date);
-
         return result;
+    }
+
+    private void writeToCache(WeatherRequest weatherRequest, String cityName, List<WeatherDTO> weatherDTOList) {
+        if (HOT_CITIES.contains(cityName)) {
+            weatherCache.put(weatherRequest, weatherDTOList);
+        }
     }
 }
 

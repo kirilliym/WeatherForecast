@@ -1,6 +1,5 @@
 package dev.kirilliym.weatherforecast.mapper;
 
-import dev.kirilliym.weatherforecast.exception.OutOfWeatherRangeException;
 import dev.kirilliym.weatherforecast.model.dto.CityDTO;
 import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
 import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;

@@ -1,20 +1,13 @@
 package dev.kirilliym.weatherforecast.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import dev.kirilliym.weatherforecast.exception.CityNotFoundException;
-import dev.kirilliym.weatherforecast.exception.InvalidPlaceNameException;
-import dev.kirilliym.weatherforecast.mapper.CityMapper;
+import com.github.benmanes.caffeine.cache.Cache;
 import dev.kirilliym.weatherforecast.mapper.PlaceMapper;
-import dev.kirilliym.weatherforecast.mapper.TypoMapper;
-import dev.kirilliym.weatherforecast.model.dto.CityDTO;
 import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
-import dev.kirilliym.weatherforecast.model.entity.Place;
-import dev.kirilliym.weatherforecast.model.entity.Typo;
 import dev.kirilliym.weatherforecast.repository.PlaceRepository;
-import dev.kirilliym.weatherforecast.repository.TypoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,100 +15,53 @@ import java.util.Optional;
 public class PlaceService {
     private final PlaceMapper placeMapper;
     private final PlaceRepository placeRepository;
-    private final TypoRepository typoRepository;
-    private final TypoMapper typoMapper;
-    private final GeocodeService geocodeService;
-    private final CityService cityService;
-    private final CityMapper cityMapper;
+    private final TypoService typoService;
+
+    private static final List<String> HOT_CITIES = List.of("Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Саратов");
+
+    private final Cache<String, String> typoCache;
+    private final Cache<String, PlaceDTO> placeCache;
+
     public PlaceDTO getPlace(String place) {
-        PlaceDTO placeDTO;
+        String placeWithoutTypo = typoCache.getIfPresent(place);
 
-        Optional<Typo> optionalTypo = typoRepository.findByWrong(place);
-        if (optionalTypo.isEmpty()) {
-            JsonNode response = geocodeService.geocode(place);
-
-            int found = response
-                    .path("response")
-                    .path("GeoObjectCollection")
-                    .path("metaDataProperty")
-                    .path("GeocoderResponseMetaData")
-                    .path("found")
-                    .asInt();
-
-            if (found == 0) {
-                throw new InvalidPlaceNameException();
+        if (placeWithoutTypo == null) {
+            PlaceDTO cachedPlace = placeCache.getIfPresent(place);
+            if (cachedPlace != null) {
+                return cachedPlace;
             }
 
-            JsonNode geoObject = response
-                    .path("response")
-                    .path("GeoObjectCollection")
-                    .path("featureMember")
-                    .get(0)
-                    .path("GeoObject");
+            PlaceDTO resolvedPlace = typoService.getTypo(place).getPlace();
+            placeWithoutTypo = resolvedPlace.getName();
+            String cityName = resolvedPlace.getCity().getName();
 
-            String cityName = geoObject
-                    .path("metaDataProperty")
-                    .path("GeocoderMetaData")
-                    .path("AddressDetails")
-                    .path("Country")
-                    .path("AdministrativeArea")
-                    .path("SubAdministrativeArea")
-                    .path("Locality")
-                    .path("LocalityName")
-                    .asText();
-
-            if (cityName.isEmpty()) {
-                cityName = geoObject
-                        .path("metaDataProperty")
-                        .path("GeocoderMetaData")
-                        .path("AddressDetails")
-                        .path("Country")
-                        .path("AdministrativeArea")
-                        .path("AdministrativeAreaName")
-                        .asText();
+            if (HOT_CITIES.contains(cityName)) {
+                typoCache.put(place, placeWithoutTypo);
+                placeCache.put(placeWithoutTypo, resolvedPlace);
             }
 
-            if (cityName.isEmpty()) {
-                throw new CityNotFoundException();
-            }
-
-            CityDTO cityDTO = cityService.getCity(cityName);
-
-            String addressLine = geoObject
-                    .path("metaDataProperty")
-                    .path("GeocoderMetaData")
-                    .path("AddressDetails")
-                    .path("Country")
-                    .path("AddressLine")
-                    .asText();
-
-            String pos = geoObject.path("Point").path("pos").asText();
-            String[] parts = pos.split(" ");
-            double lon = Double.parseDouble(parts[0]);
-            double lat = Double.parseDouble(parts[1]);
-
-            Place placeEntity = new Place();
-            placeEntity.setName(addressLine);
-            placeEntity.setCity(cityMapper.mapToEntity(cityDTO));
-            placeEntity.setLat(lat);
-            placeEntity.setLon(lon);
-            placeRepository.save(placeEntity);
-
-            Typo typo = new Typo();
-            typo.setPlace(placeEntity);
-            typo.setWrong(place);
-            typoRepository.save(typo);
-
-            placeDTO = placeMapper.mapToDTO(placeEntity);
-        }
-        else {
-            placeDTO = optionalTypo.map(typoMapper::mapToDTO).get().getPlace();
+            return resolvedPlace;
         }
 
-        return placeDTO;
+        PlaceDTO cachedCorrect = placeCache.getIfPresent(placeWithoutTypo);
+        if (cachedCorrect != null) {
+            return cachedCorrect;
+        }
+
+        PlaceDTO resolvedPlace = typoService.getTypo(place).getPlace();
+        String cityName = resolvedPlace.getCity().getName();
+
+        if (HOT_CITIES.contains(cityName)) {
+            placeCache.put(placeWithoutTypo, resolvedPlace);
+        }
+
+        return resolvedPlace;
     }
 
     public PlaceDTO getPlaceById(Long id) {
-        return placeRepository.findById(id).map(placeMapper::mapToDTO).get();
+        return placeRepository.findById(id)
+                .map(placeMapper::mapToDTO)
+                .orElseThrow(() -> new IllegalArgumentException("Place with id " + id + " not found"));
     }
+
 }
