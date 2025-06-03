@@ -61,10 +61,6 @@ public class WeatherMapper {
     }
 
     public DatePlaceResponse mapToResponse(List<WeatherDTO> weatherList) {
-        if (weatherList.isEmpty()) {
-            throw new OutOfWeatherRangeException();
-        }
-
         PlaceDTO placeDTO = weatherList.get(0).getPlace();
         CityDTO cityDTO = placeDTO.getCity();
 

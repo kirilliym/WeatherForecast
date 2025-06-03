@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS city;
 
 CREATE TABLE IF NOT EXISTS city (
     id SERIAL PRIMARY KEY,
+    request_cnt BIGINT,
     name VARCHAR(255) NOT NULL
 );
 
@@ -11,7 +12,6 @@ CREATE TABLE IF NOT EXISTS place (
     id SERIAL PRIMARY KEY,
     city_id BIGINT REFERENCES city(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    request_cnt BIGINT,
     lat DOUBLE PRECISION,
     lon DOUBLE PRECISION
 );

@@ -65,6 +65,17 @@ public class PlaceService {
                     .asText();
 
             if (cityName.isEmpty()) {
+                cityName = geoObject
+                        .path("metaDataProperty")
+                        .path("GeocoderMetaData")
+                        .path("AddressDetails")
+                        .path("Country")
+                        .path("AdministrativeArea")
+                        .path("AdministrativeAreaName")
+                        .asText();
+            }
+
+            if (cityName.isEmpty()) {
                 throw new CityNotFoundException();
             }
 
@@ -86,7 +97,6 @@ public class PlaceService {
             Place placeEntity = new Place();
             placeEntity.setName(addressLine);
             placeEntity.setCity(cityMapper.mapToEntity(cityDTO));
-            placeEntity.setRequestCnt(1L);
             placeEntity.setLat(lat);
             placeEntity.setLon(lon);
             placeRepository.save(placeEntity);
@@ -103,5 +113,9 @@ public class PlaceService {
         }
 
         return placeDTO;
+    }
+
+    public PlaceDTO getPlaceById(Long id) {
+        return placeRepository.findById(id).map(placeMapper::mapToDTO).get();
     }
 }

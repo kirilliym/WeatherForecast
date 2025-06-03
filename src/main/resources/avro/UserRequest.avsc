@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "name": "UserRequest",
+  "namespace": "dev.kirilliym.weatherforecast.avro",
+  "fields": [
+    {
+      "name": "request",
+      "type": "string"
+    },
+    {
+      "name": "place_id",
+      "type": "long"
+    },
+    {
+      "name": "request_date",
+      "type": "string"
+    },
+    {
+      "name": "date",
+      "type": "string"
+    },
+    {
+      "name": "time",
+      "type": "string"
+    }
+  ]
+}

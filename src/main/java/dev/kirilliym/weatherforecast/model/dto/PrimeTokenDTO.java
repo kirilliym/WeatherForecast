@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CityDTO {
-    private Integer id;
-    private String name;
-    private Long requestCnt;
+public class PrimeTokenDTO {
+    private Long id;
+    private String token;
+    private Integer remainOperations;
 }

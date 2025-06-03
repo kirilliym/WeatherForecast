@@ -15,7 +15,6 @@ public class PlaceMapper {
                 place.getId(),
                 cityMapper.mapToDTO(place.getCity()),
                 place.getName(),
-                place.getRequestCnt(),
                 place.getLat(),
                 place.getLon()
         );
@@ -26,7 +25,6 @@ public class PlaceMapper {
                 dto.getId(),
                 cityMapper.mapToEntity(dto.getCity()),
                 dto.getName(),
-                dto.getRequestCnt(),
                 dto.getLat(),
                 dto.getLon()
         );

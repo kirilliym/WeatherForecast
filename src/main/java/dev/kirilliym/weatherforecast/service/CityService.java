@@ -7,7 +7,9 @@ import dev.kirilliym.weatherforecast.repository.CityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,7 @@ public class CityService {
         if (cityOptional.isEmpty()) {
             City cityEntity = new City();
             cityEntity.setName(city);
+            cityEntity.setRequestCnt(0L);
             cityRepository.save(cityEntity);
 
             cityDTO = cityMapper.mapToDTO(cityEntity);
@@ -31,5 +34,11 @@ public class CityService {
         }
 
         return cityDTO;
+    }
+
+    public Map<String, Long> getCityRequestCounts() {
+        return cityRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(City::getName, City::getRequestCnt));
     }
 }

@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "Error",
+  "namespace": "dev.kirilliym.weatherforecast.avro",
+  "fields": [
+    { "name": "message", "type": "string" },
+    { "name": "status", "type": "int" },
+    { "name": "timestamp", "type": "string" }
+  ]
+}

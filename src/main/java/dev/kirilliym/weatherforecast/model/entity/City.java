@@ -18,4 +18,7 @@ public class City {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(name = "request_cnt")
+    private Long requestCnt;
 }

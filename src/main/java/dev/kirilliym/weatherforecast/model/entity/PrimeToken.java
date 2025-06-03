@@ -6,26 +6,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "place")
+@Table(name = "prime_token")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Place {
+public class PrimeToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "city_id", referencedColumnName = "id")
-    private City city;
+    @Column(nullable = false, length = 255)
+    private String token;
 
     @Column(nullable = false)
-    private String name;
-
-    @Column
-    private Double lat;
-
-    @Column
-    private Double lon;
+    private Integer remainOperations;
 }

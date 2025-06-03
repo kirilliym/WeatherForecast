@@ -1,11 +1,30 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5436/WeatherForecast
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://local-storage:5432/WeatherForecast
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
+  redis:
+    host: redis
+    port: 6379
 
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+
+  kafka:
+    bootstrap-servers: redpanda:9092
+    properties:
+      schema.registry.url: ${SCHEMA_REGISTRY_URL}
+    consumer:
+      group-id: weather-consumer-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        specific.avro.reader: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer

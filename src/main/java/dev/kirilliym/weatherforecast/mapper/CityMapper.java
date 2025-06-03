@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 public class CityMapper {
 
     public CityDTO mapToDTO(City city) {
-        return new CityDTO(city.getId(), city.getName());
+        return new CityDTO(city.getId(), city.getName(), city.getRequestCnt());
     }
 
     public City mapToEntity(CityDTO cityDTO) {
-        return new City(cityDTO.getId(), cityDTO.getName());
+        return new City(cityDTO.getId(), cityDTO.getName(), cityDTO.getRequestCnt());
     }
 
 }

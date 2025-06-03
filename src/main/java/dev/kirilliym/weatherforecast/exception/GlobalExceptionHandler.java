@@ -16,6 +16,20 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST));
     }
 
+    @ExceptionHandler(NoTokenOperationsException.class)
+    public ResponseEntity<ErrorResponse> handleNoTokenOperationsException(NoTokenOperationsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ErrorResponse(ex.getMessage(), HttpStatus.METHOD_NOT_ALLOWED));
+    }
+
+    @ExceptionHandler(TokenNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTokenNotFoundException(TokenNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND));
+    }
+
     @ExceptionHandler(OutOfWeatherRangeException.class)
     public ResponseEntity<ErrorResponse> handleOutOfWeatherRangeException(OutOfWeatherRangeException ex) {
         return ResponseEntity

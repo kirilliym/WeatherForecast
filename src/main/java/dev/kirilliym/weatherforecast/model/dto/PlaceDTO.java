@@ -11,7 +11,6 @@ public class PlaceDTO {
     private Long id;
     private CityDTO city;
     private String name;
-    private Long requestCnt;
     private Double lat;
     private Double lon;
 }

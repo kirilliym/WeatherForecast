@@ -5,6 +5,7 @@ import dev.kirilliym.weatherforecast.mapper.WeatherMapper;
 import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
 import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;
 import dev.kirilliym.weatherforecast.model.entity.Weather;
+import dev.kirilliym.weatherforecast.producer.UserRequestProducer;
 import dev.kirilliym.weatherforecast.repository.WeatherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class WeatherService {
     private final PlaceService placeService;
     private final WeatherMapper weatherMapper;
     private final EolService eolService;
+    private final UserRequestProducer userRequestProducer;
 
     private static final Duration MAX_DATA_AGE = Duration.ofHours(6);
 
@@ -66,6 +68,8 @@ public class WeatherService {
             Weather weather = weatherRepository.save(weatherMapper.mapToEntity(dto));
             result.add(weatherMapper.mapToDTO(weather));
         }
+
+        userRequestProducer.send(place, date);
 
         return result;
     }
