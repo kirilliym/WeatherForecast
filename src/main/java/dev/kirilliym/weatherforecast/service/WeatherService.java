@@ -28,9 +28,9 @@ public class WeatherService {
     private final EolService eolService;
     private final UserRequestProducer userRequestProducer;
     private final Cache<WeatherRequest, List<WeatherDTO>> weatherCache;
+    private final CacheService cacheService;
 
     private static final Duration MAX_DATA_AGE = Duration.ofHours(6);
-    private static final List<String> HOT_CITIES = List.of("Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Саратов");
 
     @Transactional
     public List<WeatherDTO> getWeather(String place, LocalDate date) {
@@ -98,7 +98,7 @@ public class WeatherService {
     }
 
     private void writeToCache(WeatherRequest weatherRequest, String cityName, List<WeatherDTO> weatherDTOList) {
-        if (HOT_CITIES.contains(cityName)) {
+        if (cacheService.getHotCities().contains(cityName)) {
             weatherCache.put(weatherRequest, weatherDTOList);
         }
     }

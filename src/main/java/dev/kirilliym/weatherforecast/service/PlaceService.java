@@ -16,8 +16,8 @@ public class PlaceService {
     private final PlaceMapper placeMapper;
     private final PlaceRepository placeRepository;
     private final TypoService typoService;
+    private final CacheService cacheService;
 
-    private static final List<String> HOT_CITIES = List.of("Москва", "Санкт-Петербург", "Казань", "Новосибирск", "Саратов");
 
     private final Cache<String, String> typoCache;
     private final Cache<String, PlaceDTO> placeCache;
@@ -35,7 +35,7 @@ public class PlaceService {
             placeWithoutTypo = resolvedPlace.getName();
             String cityName = resolvedPlace.getCity().getName();
 
-            if (HOT_CITIES.contains(cityName)) {
+            if (cacheService.getHotCities().contains(cityName)) {
                 typoCache.put(place, placeWithoutTypo);
                 placeCache.put(placeWithoutTypo, resolvedPlace);
             }
@@ -51,7 +51,7 @@ public class PlaceService {
         PlaceDTO resolvedPlace = typoService.getTypo(place).getPlace();
         String cityName = resolvedPlace.getCity().getName();
 
-        if (HOT_CITIES.contains(cityName)) {
+        if (cacheService.getHotCities().contains(cityName)) {
             placeCache.put(placeWithoutTypo, resolvedPlace);
         }
 
