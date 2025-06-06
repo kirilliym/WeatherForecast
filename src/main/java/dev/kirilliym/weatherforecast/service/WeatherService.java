@@ -3,7 +3,7 @@ package dev.kirilliym.weatherforecast.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import dev.kirilliym.weatherforecast.mapper.WeatherMapper;
-import dev.kirilliym.weatherforecast.model.WeatherRequest;
+import dev.kirilliym.weatherforecast.model.request.WeatherRequest;
 import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
 import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;
 import dev.kirilliym.weatherforecast.model.entity.Weather;
@@ -83,6 +83,7 @@ public class WeatherService {
             dto.setWindSpeed10((long) node.get("wind_speed_10").asDouble());
             dto.setPresSurf((long) node.get("pres_surf").asDouble());
             dto.setVlaga2f((long) node.get("vlaga_2").asDouble());
+            dto.setOblachnost_atmo((long) node.get("oblachnost_atmo").asDouble());
 
             String dateTimeStr = node.get("dt_forecast").asText();
             LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr);

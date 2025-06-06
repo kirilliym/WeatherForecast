@@ -27,6 +27,7 @@ public class WeatherMapper {
                 weather.getWindSpeed10(),
                 weather.getPresSurf(),
                 weather.getVlaga2f(),
+                weather.getOblachnost_atmo(),
                 weather.getUpdated(),
                 weather.getDate(),
                 weather.getTime()
@@ -42,6 +43,7 @@ public class WeatherMapper {
                 dto.getWindSpeed10(),
                 dto.getPresSurf(),
                 dto.getVlaga2f(),
+                dto.getOblachnost_atmo(),
                 dto.getUpdated(),
                 dto.getDate(),
                 dto.getTime()
@@ -55,6 +57,7 @@ public class WeatherMapper {
                 dto.getWindSpeed10(),
                 dto.getPresSurf(),
                 dto.getVlaga2f(),
+                dto.getOblachnost_atmo(),
                 dto.getTime()
         );
     }

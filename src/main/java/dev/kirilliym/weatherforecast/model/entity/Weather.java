@@ -39,6 +39,9 @@ public class Weather {
     @Column(name = "vlaga_2f")
     private Long vlaga2f;
 
+    @Column(name = "oblachnost_atmo")
+    private Long oblachnost_atmo;
+
     @Column
     private LocalDateTime updated;
 

@@ -1,6 +1,6 @@
 package dev.kirilliym.weatherforecast.controller;
 
-import dev.kirilliym.weatherforecast.model.WeatherRequest;
+import dev.kirilliym.weatherforecast.model.request.WeatherRequest;
 import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
 import dev.kirilliym.weatherforecast.model.dto.PrimeTokenDTO;
 import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;

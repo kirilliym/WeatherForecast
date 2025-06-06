@@ -1,4 +1,4 @@
-package dev.kirilliym.weatherforecast.model;
+package dev.kirilliym.weatherforecast.model.request;
 
 import java.time.LocalDate;
 

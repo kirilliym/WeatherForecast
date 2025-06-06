@@ -19,6 +19,7 @@ public class WeatherDTO {
     private Long windSpeed10;
     private Long presSurf;
     private Long vlaga2f;
+    private Long oblachnost_atmo;
     private LocalDateTime updated;
     private LocalDate date;
     private LocalTime time;

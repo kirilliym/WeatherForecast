@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS weather (
     wind_speed_10 BIGINT,
     pres_surf BIGINT,
     vlaga_2f BIGINT,
+    oblachnost_atmo BIGINT,
     updated TIMESTAMP,
     date DATE,
     time TIME
