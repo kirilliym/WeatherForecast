@@ -1,7 +1,7 @@
 package dev.kirilliym.weatherforecast.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import dev.kirilliym.weatherforecast.model.WeatherRequest;
+import dev.kirilliym.weatherforecast.model.request.WeatherRequest;
 import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
 import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;
 import lombok.RequiredArgsConstructor;

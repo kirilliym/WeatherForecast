@@ -2,7 +2,7 @@ package dev.kirilliym.weatherforecast.config;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import dev.kirilliym.weatherforecast.model.WeatherRequest;
+import dev.kirilliym.weatherforecast.model.request.WeatherRequest;
 import dev.kirilliym.weatherforecast.model.dto.PlaceDTO;
 import dev.kirilliym.weatherforecast.model.dto.WeatherDTO;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +35,12 @@ public class CacheConfig {
         return Caffeine.newBuilder()
                 .expireAfterWrite(Duration.ofHours(1))
                 .maximumSize(10_000)
+                .build();
+    }
+
+    @Bean
+    public Cache<String, List<String>> hotCitiesCache() {
+        return Caffeine.newBuilder()
                 .build();
     }
 }
